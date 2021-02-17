@@ -1,0 +1,167 @@
+\newpage
+\section*{LECTURE 3}
+\section{Agenda}
+
+This lecture covers some notation that will be useful in representation of matrices. We'll also go over root finding, and minimization techniques, with and without equality constraints. Also remember to check out the lecture recording to get an overview of Homework 1! 
+
+\section{Notation}
+Consider a function $f(x): \mathbb{R}^n \longrightarrow  \mathbb{R}$. For this function, we have its derivatives
+\begin{align}
+    \frac{\partial f}{\partial x} \in \mathbb{R}^n
+\end{align}
+i.e. the derivative $\frac{\partial f}{\partial x}$ is a row vector. This is because the $\frac{\partial f}{\partial x}$ is a linear operator mapping $\Delta x$ into $\Delta f$:
+\begin{align}
+    f(x + \Delta x) \approx f(x) + \frac{\partial f}{\partial x} \ \Delta x
+\end{align}
+
+\noindent
+Similarly, given a function $g(y): \mathbb{R}^m \longrightarrow \mathbb{R}^n$, we have: 
+\begin{align}
+    \frac{\partial g}{\partial y} \in \mathbb{R}^{n \times m}
+\end{align}
+because $g(y+\Delta y) \approx g(y) + \frac{\partial g}{\partial y} \ \Delta y$.
+
+\noindent
+This is important because it makes the chain rule work:
+\begin{align}
+    f(g(y+\Delta y)) \approx f(g(y)) + \evalat{\frac{\partial f}{\partial x}}{g(y)} \evalat{\frac{\partial g}{\partial y}}{y} \ \Delta y
+\end{align}
+
+\noindent
+For convenience, we will also define the gradient: 
+\begin{align}
+    \nabla f(x) = ( \frac{\partial f}{\partial x})^T \in \mathbb{R}^{n \times 1}
+\end{align}
+which is a column vector. Further, the second derivative (or the Hessian) is - 
+\begin{align}
+    \nabla^2 f(x) = ( \frac{\partial^2 f}{\partial x^2})^T = \frac{\partial}{\partial x} (\nabla f(x)) \in \mathbb{R}^{n \times n}
+\end{align}
+
+\section{Root Finding}
+Now that we have our notation fixed, let's consider how we can find a ``root''. Consider a function $f(x)$. We want to find a ``root'' $x^*$ such that $f(x^*)=0$. This is closely related to finding the fixed point of a system: 
+\begin{align}
+    f(x^*) = x*
+\end{align}
+Root finding is finding the equilibrium point of a continuous ODE. Fixed points are equilibrium points of \textit{discrete} time versions of these ODEs. 
+
+\subsection{Newton's Method}:
+One way to go about root finding is to use Newton's method. Here, we use a Taylor approximation of our function around our initial guess, and solve for $x$ around this guess. 
+\begin{align}
+    f(x + \Delta x) \approx f(x) + \evalat{\frac{\partial f}{\partial x}}{x} \Delta x = 0
+    \implies \Delta x = - (\frac{\partial f}{\partial x})^{-1} f(x) 
+\end{align}
+We can then find the root of the system by repeatedly updating our estimate of the root with: $x \gets x + \Delta x$, until the root converges. 
+
+\subsection{Backward Euler}
+We can do this using Backward Euler Newton's method; Newton's method thus offers very fast convergence when compared to fixed point iteration. 
+
+\subsection{Take-Away Messages}:
+\begin{itemize}
+    \item Quadratic convergence rate. 
+    \item We can achieve machine precision. 
+    \item Most expensive part of this operation is solving a linear system, which is an $O(n^3)$ operation.
+    \item It's possible to improve upon the time-complexity by taking advantage of the structure of the problem. (We'll touch on this later!) 
+\end{itemize}
+
+\section{Minimization}
+Consider finding a value $x$ for which the function $f(x): \mathbb{R}^n \longrightarrow \mathbb{R}$ attains its minimum value. If $f$ is smooth, $\evalat{\frac{\partial f}{\partial x}}{x^*} = 0$ at local minima. 
+This means we can go about minimizing $f$ by applying Newton root finding to $\frac{\partial f}{\partial x}=0$. 
+
+\noindent
+Consider: 
+\begin{align}
+    \nabla f(x + \Delta x) \approx \nabla f(x) + \nabla^2 f(x) \Delta x = 0
+    \implies \Delta x = - (\nabla^2 f(x))^{-1} \nabla f(x) = 0
+\end{align}
+This means we can find our minimum by repeatedly updating our estimate $x$ as $x \gets x + \Delta x$ until convergence. 
+
+\noindent
+The intuition for this is that we are fitting a quadratic approximation to $f(x)$, using a Taylor expansion at the current guess of the solution. We can exactly minimize quadratic approximations.
+
+\noindent
+Remember to look at the Jupyter notebook in the lecture video for an example $f(x) = x^4 + x^3 - x^2 -x$. 
+
+\subsection{Take-Away Messages}
+\begin{itemize}
+        \item Newton's root finding is a \textbf{local} method. It will find the \textbf{closest} fixed point to the initial guess, which could be a maxima, minima, or a saddle point. 
+\end{itemize}
+
+\subsection{Sufficient Conditions}
+In the example, we saw that Newton's method doesn't really care about whether it is maximizing or minimizing the function at hand. So how do we know which we're doing? Let's think about the scalar case: 
+\begin{align}
+    \Delta x = - (\nabla^2 f)^{-1} \nabla f
+\end{align}
+Here, the $-$ signifies performing descent on the function value, the term $(\nabla^2 f)^{-1}$ is analogous to a learning rate, and $\nabla f$ is simply the gradient. 
+\begin{align}
+    \nabla^2 f > 0 \implies \textrm{Descent (minimization)} \\
+    \nabla^2 f < 0 \implies \textrm{Ascent (maximization)}
+\end{align}
+In the $\mathbb{R}^n$ case, the equivalent conditions are whether the second derivative Hessians are positive definite (for descent / minimization) or vice versa. 
+
+\noindent
+If $\nabla^2 f > 0$ everywhere in the function domain, we have that $f$ is strongly convex. We can always find a global minimum by Newton's method. Unfortunately, this doesn't really hold true for hard / nonlinear problems. 
+
+\subsection{Regularization}
+What do we do if we don't have a strongly convex function? The practical solution is to make sure we are actually always minimizing while executing Newton's method. 
+\begin{align}
+    H \gets \nabla^2 f
+\end{align}
+Now while $H \not> 0$  (while the Hessian is not positive definite), we can iteratively set $H \gets H+\beta I$, where $\beta$ is a scalar hyper-parameter. 
+\\
+\\
+\noindent
+\begin{algorithm}
+	\caption{Regularization / Damped Newton's Method}
+	\label{alg:regularization}
+	\begin{algorithmic}[1]	
+        \State $H \gets \nabla^2 f$ 
+        % \State While $H \ngtr 0$ \Comment{Not positive definite}
+        % \For 
+        \While {$H \not> 0$} \Comment{Not positive definite.}
+            \State $H \gets H + \beta I$ \Comment{$\beta$ is a scalar hyperparameter.}
+        \EndWhile
+        \State $\Delta x = -H^{-1} \nabla f$
+        \State $x \gets x + \Delta x$
+	\end{algorithmic}
+\end{algorithm}
+\\
+\\
+
+After modifying the Hessian in this way, we can then take a ``Newton'' step with $\Delta x = - H^{-1} \nabla f$, $x \gets x + \Delta x$. This modified Newton's method is called ``Damped Newton's Method''. The trick of modifying the Hessian is called regularization. It guarantees we are performing descent (minimization), and shrinks the step size of the step taken.
+
+\noindent
+Remember to check out the lecture video for the behavior in our example! 
+
+\subsection{Line Search}
+One problem that we ran into, is that the step $\Delta x$ is often too big, and overshoots the minimum of the function. To fix this, we can check the function value at $f(x + \Delta x)$ and ``backtrack'' until we get a ``good'' reduction.
+
+\noindent
+There are many strategies that exist to do this. One such strategy that is both simple and effective, is the Armijo rule: 
+\\
+\\
+\noindent
+\begin{algorithm}
+	\caption{Armijo Rule}
+	\label{alg:armijo}
+	\begin{algorithmic}[1]	
+        \State $\alpha = 1$  \Comment{Step Length}
+        \While {$f(x + \alpha \Delta x) > f(x) + b \alpha \nabla f(x) ^T \Delta x$} \\ \Comment{$\alpha \nabla f(x) ^T \Delta x$ is the expected reduction from gradient, and $b$ is the tolerance.}
+            \State $\alpha \gets c \alpha$ \Comment{$c$ is a scalar $<1$.}
+        \EndWhile
+	\end{algorithmic}
+\end{algorithm}
+\\
+\\
+
+\noindent
+The intuition for this is to make sure the step size agrees with linearization within some tolerance $b$. Typical values of the parameters above are - $c= 0.5$, $b=10^{-4} \ \rm{to} \ 0.1$. 
+
+\subsection{Take-Away Messages}
+\begin{itemize}
+    \item Newton's method with simple and cheap modifications or globalization strategies  (such as regularization), is extremely effective at finding local minima.
+\end{itemize}
+
+\section{References}
+Remember to check out \cite{nocedal2006numerical} for more details on this. 
+
+\printbibliography

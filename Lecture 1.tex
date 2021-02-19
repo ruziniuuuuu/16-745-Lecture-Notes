@@ -63,7 +63,7 @@ The velocity $\dot{x}$ is:
         = 
         \begin{bmatrix}
             \dot{\theta} \\
-            -\frac{q}{l} \sin{\theta} + \frac{1}{m l^2} u
+            -\frac{g}{l} \sin{\theta} + \frac{1}{m l^2} u
         \end{bmatrix}
 \end{align} 
 Here, the system dynamics $f(x,u)$ are given as 
@@ -71,7 +71,7 @@ Here, the system dynamics $f(x,u)$ are given as
     f(x,u) = 
         \begin{bmatrix}
             \dot{\theta} \\
-            -\frac{q}{l} \sin{\theta} + \frac{1}{m l^2} u
+            -\frac{g}{l} \sin{\theta} + \frac{1}{m l^2} u
         \end{bmatrix}
 \end{align} 
 The manifold of state here is described as $x \in \mathbb{S}^1 \times \mathbb{R}$, a cylinder.
@@ -85,7 +85,7 @@ For instance, the pendulum system can be described as a control-affine system, w
 \begin{align}
     f_{0}(x) = \begin{bmatrix}
         \dot{\theta} \\
-        - \frac{q}{l} \sin(\theta)
+        - \frac{g}{l} \sin(\theta)
     \end{bmatrix}
     \ \ \
     G(x) = \begin{bmatrix}
@@ -150,12 +150,12 @@ Algebraically, this is described by roots of the dynamics equation. \\
     \label{fig:f2}
 \end{figure}
 
-
+\noindent
 In the pendulum example (without a control input) \cref{fig:f2} - 
 \begin{align}
     \dot{x} = \begin{bmatrix}
         \dot{\theta} \\
-        -\frac{q}{l} \sin(\theta) 
+        -\frac{g}{l} \sin(\theta) 
     \end{bmatrix}
     = 
     \begin{bmatrix}
@@ -170,7 +170,7 @@ Lets consider a small control problem. Let's try to move the equilibrium point o
 \begin{align}
     \dot{x} = \begin{bmatrix}
         \dot{\theta} \\
-        - \frac{q}{l} \sin(\frac{\pi}{2}) + \frac{1}{ml^2} u 
+        - \frac{g}{l} \sin(\frac{\pi}{2}) + \frac{1}{ml^2} u 
     \end{bmatrix}
     =
     \begin{bmatrix}
@@ -180,7 +180,7 @@ Lets consider a small control problem. Let's try to move the equilibrium point o
 \end{align}
 Solving for $u$, we have:
 \begin{align}
-    \frac{1}{ml^2} u = - \frac{q}{l} \sin (\frac{\pi}{2}) 
+    \frac{1}{ml^2} u = - \frac{g}{l} \sin (\frac{\pi}{2}) 
     \implies u = mgl
 \end{align}
 
@@ -213,12 +213,12 @@ In our pendulum example,
 \begin{align}
     f(x) = \begin{bmatrix}
         \dot{\theta} \\
-        - \frac{q}{l} \sin(\theta) 
+        - \frac{g}{l} \sin(\theta) 
     \end{bmatrix}
     \implies
     \frac{\partial f}{\partial x} = \begin{bmatrix}
         0 & 1 \\
-        - \frac{q}{l} \cos(\theta) & 0
+        - \frac{g}{l} \cos(\theta) & 0
     \end{bmatrix}
 \end{align}
 Consider the equilibrium point $\theta=\pi$. 
@@ -226,10 +226,10 @@ Consider the equilibrium point $\theta=\pi$.
     \implies
         \evalat{\frac{\partial f}{\partial x}}{\theta=\pi} = \begin{bmatrix}
         0 & 1 \\
-        \frac{q}{l} & 0
+        \frac{g}{l} & 0
     \end{bmatrix}
     \implies
-    eig(\evalat{\frac{\partial f}{\partial x}}{\theta=\pi}) = \pm \sqrt{\frac{q}{l}}
+    eig(\evalat{\frac{\partial f}{\partial x}}{\theta=\pi}) = \pm \sqrt{\frac{g}{l}}
 \end{align}
 Since one eigenvalue is negative, the equibilrium point $\theta=\pi$ is unstable.
 In contrast, at the equilibrium point $\theta=0$. 
@@ -237,10 +237,10 @@ In contrast, at the equilibrium point $\theta=0$.
     \implies
         \evalat{\frac{\partial f}{\partial x}}{\theta=0} = \begin{bmatrix}
         0 & 1 \\
-        - \frac{q}{l} & 0
+        - \frac{g}{l} & 0
     \end{bmatrix}
     \implies
-    eig(\evalat{\frac{\partial f}{\partial x}}{\theta=\pi}) = 0 \pm i \sqrt{\frac{q}{l}}
+    eig(\evalat{\frac{\partial f}{\partial x}}{\theta=\pi}) = 0 \pm i \sqrt{\frac{g}{l}}
 \end{align}
 In this case, the real part of the eigenvalue is $0$. In this purely imaginary eigenvalue case, the system is called marginally stable, and experiences undamped oscillations. 
 Adding damping to the systems (such as applying control inputs $u = - K d \dot{\theta}$, results in strictly negative eigenvalues, leading to a stable system. 

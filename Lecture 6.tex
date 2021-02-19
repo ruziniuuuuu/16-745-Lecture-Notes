@@ -1,0 +1,166 @@
+\newpage
+\section{LECTURE 5}
+
+\section{Agenda}
+This lecture covers Pontryagin's Minimum Principle, and an introduction to Linear Quadratic Regulators. 
+
+\section{Pontryagin's Minimum Principle}
+\begin{itemize}
+    \item The Pontryagin's Minimum Principle is also a ``maximum principle'' if instead of minimizing a cost function, we are maximizing a reward function. 
+    \item Essentially provides first order necessary conditions of deterministic optimal control problems. 
+    \item In discrete time, it's just a special case of the KKT. 
+\end{itemize}
+Consider the problem we have before: 
+\begin{align}
+    \min_{x_{1:N}, u_{1:N-1}} \ & J(x_{1:N}, u_{1:N-1}) = \sum_{k=1}^{N-1} l(x_k, u_k) + l_F(x_N) \\
+    \ni \ & x_{n+1} = f(x_n,u_n)
+\end{align}
+In this setting, we will consider torque limits applied to the problem, but it's hard to handle constraints on state (such as collision constraints, like we had before). 
+
+\noindent
+We can form the Lagrangian of this problem as follows: 
+\begin{align}
+    L = \sum_{k=1}^{N-1} \Big[ l(x_k,u_k) + \lambda_{k+1}^+ (f(x_k,u_k)-x_{k+1}) \Big] + l_F(x_N) \\
+\end{align}
+This result is usually stated in terms of the ``Hamiltonian'': 
+\begin{align}
+    H(x, u, \lambda) = l(x,u) + \lambda^T f(x,u)
+\end{align}
+Plugging in $H$ into the Lagrangian $L$:
+\begin{align}
+    L = H(x_1, u_1, \lambda_2) + \Big[ \sum_{k=2}^{N-1} H(x_k,u_k,\lambda_{k+1}) - \lambda_k^T x_k \Big] + l_F(x_N) - \lambda_N^T x_N 
+\end{align}
+Note the change in indexing of the summation.
+If we take derivatives with respect to $x$ and $\lambda$: 
+\begin{align}
+    \frac{\partial L}{\partial \lambda_k} &= \frac{\partial H}{\partial \lambda_k} - x_{k+1} = f(x_k,u_k) - x_{k+1} = 0 \\
+    \frac{\partial L}{\partial x_k} &= \frac{\partial H}{\partial x_k} - \lambda_{k}^T = \frac{\partial l}{\partial x_k} + \lambda_{k+1}^T \frac{\partial f}{\partial x_k} - \lambda_k^T = 0 \\
+    \frac{\partial L}{\partial x_N} &= \frac{\partial l_F}{\partial x_N} - \lambda_N^T = 0
+\end{align}
+For $u$, we write the $\min$ explicitly to handle the torque limits:
+\begin{align}
+    u_k &= \arg\min_{\Tilde{u}} H(x_k, \Tilde{u}, \lambda_{k+1}) \\
+    \ni \ & \Tilde{u}  \in \mathcal{U} 
+\end{align}
+Here, $\Tilde{u} \in \mathcal{U}$ is shorthand for ``in feasible set'', for example, $u_{\min} \leq \tilde{u} \leq u_{\max}$.\\
+
+\noindent
+In summary, we have: 
+\begin{align}
+    x_{k+1} &= \nabla_{\lambda} H(x_k, u_k, \lambda_{k+1}) = f(x_k, u_k) \\
+    \lambda_k &= \nabla_{x} H(x_k,u_k,\lambda_{k+1}) = \nabla_x l(x_k,u_k) + (\frac{\partial f}{\partial x})^T \lambda_{k+1} \\
+    u_k &= \arg\min_{\tilde{u}} H(x_k, \tilde{u}, \lambda_{k+1}) \\
+    &\ \ \ni \ \tilde{u} \in \mathcal{U} \\
+    \lambda_{N} &= \frac{\partial l_F}{\partial X_{N}}
+\end{align}
+Now these can be stated almost identically in continuous time: 
+\begin{align}
+    \dot{x} &= \nabla_{\lambda} H(x, u, \lambda) = f_{\rm continuous}(x, u) \\
+    \dot{\lambda} &= \nabla_{x} H(x,u,\lambda) = \nabla_x l(x,u) + (\frac{\partial f_{\rm continuous}}{\partial x})^T \lambda \\
+    u &= \arg\min_{\tilde{u}} H(x, \tilde{u}, \lambda) \\
+    &\ \ \ni \  \tilde{u} \in \mathcal{U} \\
+    \lambda_{N} &= \frac{\partial l_F}{\partial X_{N}}
+\end{align}
+
+\subsection{Notes}
+\begin{itemize}
+    \item Historically, many algorithms were based on forward / backward integration of the continuous ODEs for $x(t), \lambda(t)$ for performing gradient descent on $u(t)$. 
+    \item Thse are called ``indirect'' and / or ``shooting'' methods. 
+    \item In continuous time, $\lambda(t)$ is called ``co-state'' trajectory. 
+    \item These methods have largely fallen out of favor as computers and solvers have improved. 
+\end{itemize}
+
+\section{Linear Quadratic Regulator (LQR)}
+A very common class of controllers is the Linear Quadratic Regulator. In this setting, we have a quadratic cost, and linear dynamics, specified as: 
+\begin{align}
+    \min_{x_{1:N}, u_{1:N-1}} &\sum_{k=1}^{N-1} \Big[ \frac{1}{2} x_k^T Q x_k + \frac{1}{2} u_k^T R_k u_k  \Big] + \frac{1}{2} x_N^T Q_N x_N \\
+    & \ \ni \ x_{k+1} = A_k x_k + B_k u_k 
+\end{align}
+Here, we have: $Q \geq 0, R \geq 0$. 
+\begin{itemize}
+    \item The goal of this problem is to drive the system to the origin.
+    \item It's considered a ``time-invariant'' LQR if $A_k=A, B_k=B, Q_k=Q, R_k=R \ \forall \ k$, and is a ``time-varying'' LQR (TVLQR) otherwise. 
+    \item We typically use time-invariant LQRs for stabilizing an equilibrium, and TVLQR for tracking trajectories.
+    \item Can (locally) approximate many non-linear problems, and are thus very commonly used. 
+    \item There are also many extensions of LQR, including the infinite horizon case, and stochastic LQR. 
+    \item It's been called the ``crown jewel of control theory.''
+\end{itemize}
+
+\subsection{LQR with Indirect Shooting}
+Consider: 
+\begin{align}
+    x_{k+1} &= A x_k + B u_k \\
+    \lambda_k &= Q x_k + A^T \lambda_{k+1}, \ \lambda_N = Q x_N \\
+    u_{k} &= -R^{-1} B^T \lambda_{k+1} \ \textrm{This gives the gradients of the cost w.r.t.} u_k
+\end{align}
+
+The procedure for LQR with indirect shooting is: 
+\begin{enumerate}
+    \item Start with an initial guess trajectory. 
+    \item Simulate (or ``rollout'') to get $x(t)$.
+    \item Backward pass to get $\lambda(t)$ and $\Delta u(t)$.
+    \item Rollout with line search on $\Delta u$.
+    \item Go to (3) until convergence.
+\end{enumerate}
+
+\subsection{Example}
+Check out the example of the double integrator in the lecture. Here, we have - 
+\begin{align}
+    \dot{x} = \begin{bmatrix}
+        \dot{q} \\
+        \ddot{q} 
+    \end{bmatrix}
+    = 
+    \begin{bmatrix}
+        0 \ \ 1  \\
+        0 \ \ 0
+    \end{bmatrix}
+    \begin{bmatrix}
+        q \\
+        \dot{q} 
+    \end{bmatrix}
+    + 
+    \begin{bmatrix}
+        0 \\
+        1
+    \end{bmatrix}
+    u 
+\end{align}
+Think of this as a ``sliding brick'' on ice, without friction. Here, the discrete-time version of this system is - 
+\begin{align}
+    x_{k+1} = 
+    \begin{bmatrix}
+        1 \ \ h  \\
+        0 \ \ 1
+    \end{bmatrix}
+    \begin{bmatrix}
+        q_k \\
+        \dot{q_k} 
+    \end{bmatrix}
+    + 
+    \begin{bmatrix}
+        \frac{1}{2} h^2 \\
+        h
+    \end{bmatrix}
+    u_k 
+\end{align} 
+where $    \begin{bmatrix}
+        1 \ \ h  \\
+        0 \ \ 1
+    \end{bmatrix}$ represents the $A$ matrix, and $    \begin{bmatrix}
+        \frac{1}{2} h^2 \\
+        h
+    \end{bmatrix}$ represents the $B$ matrix.
+    
+\subsection{Bryson's Rule}
+\begin{itemize}
+    \item Cost-tuning heuristic. 
+    \item Set diagonal elements of $Q$ and $R$ to $\frac{1}{ \textrm{max value}^2 }$.
+    \item Normalizes all cost terms to $1$. 
+    \item Good starting point for tuning. 
+    \item In the scalar case, if we have: 
+    \begin{align}
+        \frac{1}{2} Q x^2 + \frac{1}{2} R u^2 
+    \end{align}
+    Then we can set $Q$ such that $Q x^2 = \frac{1}{x_{\max}^2 } x_{\max}^2 = 1$ , and similarly $R$ such that: $R u^2 = \frac{1}{u_{\max}^2} u_{\max}^2 = 1$
+\end{itemize}

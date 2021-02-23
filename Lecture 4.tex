@@ -176,7 +176,7 @@ Algorithmically, this can be expressed as:
 	\begin{algorithmic}[1]	
 	    \While {Not Converged} 
             \State $\min_x L_{\rho} (x, \tilde{\lambda}$ \Comment{Minimize w.r.t $x$.}
-            \State $\tilde{\lambda} \gets \tilde{\lambda} - \min(0,\rho c(x)) $ \Comment{Update the multipliers.}
+            \State $\tilde{\lambda} \gets \tilde{\lambda} - \max(0, \tilde{\lambda}-\rho c(x)) $ \Comment{Update the multipliers, clamping to guarantee non-negativity.}
             \State $\rho \gets \alpha \rho$ \Comment{Increase penalty. Typically, $\alpha \approx 10$}
         \EndWhile
 	\end{algorithmic}

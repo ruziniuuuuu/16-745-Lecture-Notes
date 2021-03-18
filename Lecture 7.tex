@@ -1,0 +1,246 @@
+\newpage
+\section{LECTURE 7}
+
+\section{Agenda}
+\begin{itemize}
+    \item LQR as a QP
+    \item Riccati Recursion
+\end{itemize}
+
+\section{The LQR Problem}
+Consider the LQR problem - 
+\begin{align}
+    \min_{x_{1:n}, u_{1:n-1}} J &= \Big[ \sum_{n=1}^{N-1} \frac{1}{2} x_n^T Q_n x_n + \frac{1}{2} u_n^T R_n u_n \Big] + \frac{1}{2} x_N^T Q_N x_N
+    \ &\ni \ x_{n+1} = A_n x_n + B_n u_n
+\end{align}
+Remember, we have that $Q\geq0$ and $R>0$. 
+
+\subsection{Framing LQR as a QP}
+Let us assume the initial state $x_1$ is given (and is not a decision variable). Define $z$: 
+\begin{align}
+    z = \begin{bmatrix}
+       u_1 \\
+       x_2 \\
+       u_2 \\
+       . \\
+       . \\
+       x_N
+    \end{bmatrix}
+\end{align}
+Also define $H$:
+\begin{align}
+    H = \begin{bmatrix}
+        R_1 & 0   & ... & 0 \\
+        0   & Q_2 & ... & 0 \\
+        \   & \   & .   & \ \\
+        0   & 0   & ... & Q_N
+    \end{bmatrix}
+\end{align}
+such that $J = \frac{1}{2} z^T H z$. We also define $C$ and $d$: 
+\begin{align}
+    C &= \begin{bmatrix}
+        B_1 & (-I)  & ...   & ...   & ...   & 0 \\
+        0   & A     & B     & (-I)  & ...   & 0 \\
+        \   & \     & .     & \ \\
+        0   & 0     & ...   & A_{N-1} & B_{N-1} & (-I)
+    \end{bmatrix} \\ 
+    d &= \begin{bmatrix}
+        -A_1 x_1 \\
+        0 \\
+        . \\ 
+        0 
+    \end{bmatrix}
+\end{align}
+such that $C z = d$. We now have the LQR problem can be written as a standard QP:
+\begin{align}
+    &\min_{z} \frac{1}{2} z^T H z \\
+    \ &\ni C z = d
+\end{align}
+The Lagrangian of this QP is: 
+\begin{align}
+    L(z, \lambda) = \frac{1}{2} z^T H z + \lambda^T \big[ C z - d\big]
+\end{align}
+and the KKT conditions are: 
+\begin{align}
+    \nabla_z L &= H z + C^T \lambda = 0 \\
+    \nabla_{\lambda} L &= C z - d = 0
+\end{align}
+This may be written as:
+\begin{align}
+    \begin{bmatrix}
+        H & C^T \\ 
+        C & 0 
+    \end{bmatrix}
+    \begin{bmatrix}
+        z \\
+        \lambda
+    \end{bmatrix}
+    &= 
+    \begin{bmatrix}
+        0 \\
+        d
+    \end{bmatrix}
+\end{align}
+We get the exact answer by solving this one linear system! 
+
+\subsection{Example}
+Remember to check out the example on the double integrator / sliding brick on ice. We can compare shooting to the QP solution of the LQR problem. 
+
+\subsection{A closer look at the LQR QP}
+The QP KKT system is very sparse (i.e. lots of zeros in the constituent matrices), and has a lot of structure: 
+
+% \documentclass{article}
+
+\newcommand\aug{\fboxsep=-\fboxrule\!\!\!\fbox{\strut}\!\!\!}
+\begin{align}
+    \begin{bmatrix}
+        R   & \     & \     & \     & \     &       & . & B^T &  &  \\
+        \   & Q     & \     & \     & \     &       & . & -I & A^T &  \\
+        \   & \     & R     & \     & \     &       & . & & B^T & \\
+        \   & \     & \     & Q     & \     &       & . & & -I    & A^T \\
+        \   & \     & \     & \     & R     &       & . & &   & B^T \\
+        \   & \     & \     & \     & \     & Q_N   & . &   &  & -I \\
+        .   & .     & .     & .     & .     & . & . &  .    &  .   & . \\
+        B   & -I     & \     & \     & \     & \   & . &  0 & 0 & 0 \\
+        \   & A     & B     & -I     & \     & \   & . &  0 & 0 & 0 \\
+        \   & \     & \     & A     & B     & -I   & . &  0 & 0 & 0 \\
+    \end{bmatrix}
+    \begin{bmatrix}
+        u_1 \\
+        x_2 \\
+        u_2 \\
+        x_3 \\
+        u_3 \\
+        x_4 \\
+        \lambda_2 \\
+        \lambda_3 \\
+        \lambda_4 
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        0 \\
+        0 \\
+        0 \\
+        0 \\
+        0 \\
+        0 \\
+        -A x_1 \\
+        0 \\
+        0
+    \end{bmatrix}    
+\end{align}
+-
+\noindent
+Consider the last line of upper block of this system (i.e. above the dotted line): 
+\begin{align}
+Q_N x_4 - \lambda_4 &= 0 \\
+\implies \lambda_4 &= Q_N x_4 
+\end{align}
+
+\noindent
+Now consider the second last line of the upper block of this system:
+\begin{align}
+    R u_3 + B^T \lambda_4 &= R u_3 + B^T Q_N x_4 = 0 
+\end{align}
+Plugging the dynamics into this, we have: 
+\begin{align}
+    R u_3 + B^T Q_N (A x_3 + B u_3) &= 0 \\
+    \implies u_3 &= - (R + B^T Q_N B )^{-1} B^T Q_N A x_3
+\end{align}
+We can define $K_3 = (R + B^T Q_N B )^{-1} B^T Q_N A$ in the above equation. 
+
+\noindent
+Finally, consider the third line of this system. 
+\begin{align}
+    Q x_3 - \lambda_3 + A^T \lambda_4 = 0
+\end{align}
+We can then manipulate this by first substituting $\lambda_4$, then plugging in the dynamics for $x_4$, and finally using the feedback law:
+\begin{align}
+    Q x_3 - \lambda_3 + A^T Q_N x_4 &= 0 \\
+    \implies Q x_3 - \lambda_3 + A^T Q_N (A x_3 + B u_3) &= 0 \\
+    \implies Q x_3 - \lambda_3 + A^T Q_N (A - B K) x_3 &= 0 \\
+    \implies \lambda_3 = (Q + A^T Q_N (A- BK)) x_3
+\end{align}
+We can then define $P_3 =  (Q + A^T Q_N (A- BK))$. 
+
+\noindent
+We now have a recursion for $K$ and $P$: 
+\begin{align}
+    P_N &= Q_N \\
+    K_n &= (R + B^T P_{n+1} B)^{-1} B^T P_{n+1} A \\
+    P_n &= Q + A^T P_{n+1} (A - BK_n)
+\end{align}
+
+\begin{itemize}
+    \item This is called a Riccati equation / recursion.
+    \itm We can solve the QP by doing a backward Riccati recursion followed by a forward rollout starting from $x_1$.
+    \item This has complexity $\mathcal{O} (N (n+m)^3$ instead of $\mathcal{O} (N^3 (n+m)^3$ for the naive QP solution. 
+    This carries over to the general non-linear case. 
+    \item Even more importantly, we now have a feedback policy instead of an open loop trajectory to execute. 
+\end{itemize}
+
+\subsection{Example}
+Remember to check out the lecture video for an example on LQR with Riccati open-loop, and closed loop with noise. 
+
+\subsection{Infinite Horizon}
+Let's now consider the infinite horizon case.
+\begin{itemize}
+    \item For the time-invariant LQR, $K$ matrices converge to constant values over the infinite horizon. 
+    \item For stabilization problems we almost always use the constant $K$.
+    \item We can solve for this explicitly in Julia / Matlab.
+\end{itemize}
+
+\section{Controllability}
+How do we know if LQR will work? For the time-invariant case, there is a simple answer. For any initial state $x_0$, $x_n$ is given by: 
+\begin{align}
+    x_n &= A x_{n-1} + B u_{n-1} \\
+    &= A (Ax_{n-2} + B u_{n-2}) + B u_{n-1} \\
+    &= A^n x_0 + A_{n-1} B u_0 + ... + B u_{n-1}\\
+    &= \begin{bmatrix}
+        B \ AB \ A^2 B \ ... \ A^{n-1} B 
+    \end{bmatrix} 
+    \begin{bmatrix}
+        u_{n-1} \\
+        u_{n-2} \\
+        . \\
+        . \\
+        u_0
+    \end{bmatrix}
+    + 
+    A^n x_0
+\end{align}
+Here, we may define a controllability matrix $C$ as: 
+\begin{align}
+    C = \begin{bmatrix}
+        B \ AB \ A^2 B \ ... \ A^{n-1} B 
+    \end{bmatrix} 
+\end{align}
+In order to drive any $x_0$ to any desired $x_n$, the controllability matrix must have full row rank: 
+\begin{align}
+    rank(C) = n \\
+    \ni n = dim(x)
+\end{align}
+This is equivalent to solving the following least-squares problem for $u_{0:n-1}$: 
+\begin{align}
+    \begin{bmatrix}
+        u_{n-1} \\
+        u_{n-2} \\
+        . \\
+        . \\
+        u_0
+    \end{bmatrix}
+    &= 
+    \begin{bmatrix}
+        C^T (C C^T)^{-1} 
+    \end{bmatrix}
+    \begin{bmatrix}
+        (x_n - A^n x_0)
+    \end{bmatrix}
+\end{align}
+Here, $\big[ C^T (C C^T)^{-1} \big]$ is the pseudo-inverse of controllability $C$, and requires $C C^T$ to be invertible. 
+We can stop at $n$ time steps because the Cayley-Hamilton theorem says that $A^n$ can e written as a linear combination of smaller powers of $A$: 
+\begin{align}
+    A^n = \sum_{k=0}^{n-1} \alpha_k A^k 
+\end{align}
+for some $\alpha_k$.
+Therefore adding more timesteps / columns to $C$ can't increase the rank of $C$. 

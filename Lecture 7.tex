@@ -1,21 +1,21 @@
 \newpage
 \section{LECTURE 7}
 
-\section{Agenda}
+\subsection{Agenda}
 \begin{itemize}
     \item LQR as a QP
     \item Riccati Recursion
 \end{itemize}
 
-\section{The LQR Problem}
+\subsection{The LQR Problem}
 Consider the LQR problem - 
 \begin{align}
-    \min_{x_{1:n}, u_{1:n-1}} J &= \Big[ \sum_{n=1}^{N-1} \frac{1}{2} x_n^T Q_n x_n + \frac{1}{2} u_n^T R_n u_n \Big] + \frac{1}{2} x_N^T Q_N x_N
+    \min_{x_{1:n}, u_{1:n-1}} J &= \Big[ \sum_{n=1}^{N-1} \frac{1}{2} x_n^T Q_n x_n + \frac{1}{2} u_n^T R_n u_n \Big] + \frac{1}{2} x_N^T Q_N x_N \\
     \ &\ni \ x_{n+1} = A_n x_n + B_n u_n
 \end{align}
 Remember, we have that $Q\geq0$ and $R>0$. 
 
-\subsection{Framing LQR as a QP}
+\subsubsection{Framing LQR as a QP}
 Let us assume the initial state $x_1$ is given (and is not a decision variable). Define $z$: 
 \begin{align}
     z = \begin{bmatrix}
@@ -83,10 +83,10 @@ This may be written as:
 \end{align}
 We get the exact answer by solving this one linear system! 
 
-\subsection{Example}
+\subsubsection{Example}
 Remember to check out the example on the double integrator / sliding brick on ice. We can compare shooting to the QP solution of the LQR problem. 
 
-\subsection{A closer look at the LQR QP}
+\subsubsection{A closer look at the LQR QP}
 The QP KKT system is very sparse (i.e. lots of zeros in the constituent matrices), and has a lot of structure: 
 
 % \documentclass{article}
@@ -179,10 +179,10 @@ We now have a recursion for $K$ and $P$:
     \item Even more importantly, we now have a feedback policy instead of an open loop trajectory to execute. 
 \end{itemize}
 
-\subsection{Example}
+\subsubsection{Example}
 Remember to check out the lecture video for an example on LQR with Riccati open-loop, and closed loop with noise. 
 
-\subsection{Infinite Horizon}
+\subsubsection{Infinite Horizon}
 Let's now consider the infinite horizon case.
 \begin{itemize}
     \item For the time-invariant LQR, $K$ matrices converge to constant values over the infinite horizon. 
@@ -190,7 +190,7 @@ Let's now consider the infinite horizon case.
     \item We can solve for this explicitly in Julia / Matlab.
 \end{itemize}
 
-\section{Controllability}
+\subsection{Controllability}
 How do we know if LQR will work? For the time-invariant case, there is a simple answer. For any initial state $x_0$, $x_n$ is given by: 
 \begin{align}
     x_n &= A x_{n-1} + B u_{n-1} \\

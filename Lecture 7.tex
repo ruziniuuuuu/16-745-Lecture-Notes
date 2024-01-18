@@ -1,5 +1,5 @@
 \newpage
-\section{LECTURE 7}
+\section*{LECTURE 7}
 
 \subsection{Agenda}
 \begin{itemize}
@@ -57,9 +57,9 @@ such that $C z = d$. We now have the LQR problem can be written as a standard QP
     \ &\ni C z = d
 \end{align}
 The Lagrangian of this QP is: 
-\begin{align}
+\begin{equation}
     L(z, \lambda) = \frac{1}{2} z^T H z + \lambda^T \big[ C z - d\big]
-\end{align}
+\end{equation}
 and the KKT conditions are: 
 \begin{align}
     \nabla_z L &= H z + C^T \lambda = 0 \\
@@ -173,7 +173,7 @@ We now have a recursion for $K$ and $P$:
 
 \begin{itemize}
     \item This is called a Riccati equation / recursion.
-    \itm We can solve the QP by doing a backward Riccati recursion followed by a forward rollout starting from $x_1$.
+    \item We can solve the QP by doing a backward Riccati recursion followed by a forward rollout starting from $x_1$.
     \item This has complexity $\mathcal{O} (N (n+m)^3$ instead of $\mathcal{O} (N^3 (n+m)^3$ for the naive QP solution. 
     This carries over to the general non-linear case. 
     \item Even more importantly, we now have a feedback policy instead of an open loop trajectory to execute. 

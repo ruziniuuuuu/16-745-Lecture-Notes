@@ -120,8 +120,6 @@ Here's some pseudo code for the RK4 method -
 \algnewcommand{\LineComment2}[1]{\Statex \hspace*{0.45\linewidth} \(\triangleright\) #1}
 \algnewcommand{\LineComment3}[1]{\Statex \hspace*{\fill} \(\triangleright\) #1}
 
-\\
-
 \begin{algorithm}
 	\caption{4th Order Runge-Kutta Integration}
 	\label{alg:Alg1}
@@ -134,8 +132,6 @@ Here's some pseudo code for the RK4 method -
         \State $x_{k+1} = x_{k} + \frac{h}{6} (K_1 + 2K_2 + 2K_3 + K_4)$ \Comment{Evaluate as weighted average of intermediate computations.}
 	\end{algorithmic}
 \end{algorithm}
-
-\\
 
 \noindent
 Let's try this on our Pendulum example. Instead of the explosion we observed before, the eigenvalues are right within the unit circle, and reflect the true continuous system. 
